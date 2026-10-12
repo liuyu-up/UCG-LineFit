@@ -14,7 +14,7 @@ Extract the archive and open a terminal in the extracted `UCG-LineFit` folder co
 
 | Location inside the archive | Contents |
 | --- | --- |
-| `core_method/UCG.py` | Main UCG-LineFit implementation, renamed from `feature_tour.py`. |
+| `core_method/UCG.py` | Main UCG-LineFit implementation. |
 | `core_method/feature.py`, `feature_tour_batch.py`, `feature_tour_native.py` | Required support modules for geometry, plotting, batch fitting, and optional acceleration. Keep these files beside `UCG.py`. |
 | `core_method/Algorithm_Parameters.docx` | All 148 command-line parameters and their effective defaults, presented in three-line tables. |
 | `datasets/Lab/` | Laboratory dataset and visualization, including `Lab_points.json`, `Lab_points.png`, and `single_frame.json`. |
