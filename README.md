@@ -1,80 +1,144 @@
 # UCG-LineFit
 
-UCG-LineFit is a line-segment extraction method for sparse 2D LiDAR point clouds. It combines sensor-uncertainty calibration, locally adaptive Huber fitting, and graph-based fragment recovery.
+**UCG-LineFit** is a robust line-segment extraction method for sparse 2D LiDAR point clouds. The method combines sensor-uncertainty calibration, locally adaptive robust fitting, and graph-based fragment recovery to improve line extraction under measurement noise and sparse sampling.
 
-This repository provides the Python implementation, experimental datasets, algorithm parameters, and ablation resources in a single downloadable archive.
+This repository provides the implementation and reproduction resources used in the associated experiments, including Intel and R2000 LiDAR data, self-test recordings, annotated scans, comparison methods, parameter-sensitivity studies, ablation experiments, and uncertainty-calibration results.
 
-## Download
+## Repository contents
 
-**[Download UCG-LineFit.zip](./UCG-LineFit.zip?raw=true)**
+The repository is organized by experimental purpose:
 
-Extract the archive and open a terminal in the extracted `UCG-LineFit` folder containing `core_method`, `datasets`, and `ablation`. The README inside the archive provides additional usage details and a Python API example.
+| Directory / file | Contents |
+|---|---|
+| `Intel_data_experiment/` | UCG-LineFit implementation and experiments on Intel LiDAR data; includes comparison implementations (IEPF, RANSAC, and SRG), scan data, annotated line segments, evaluation records, and figures. |
+| `Self_test_experiment/` | Self-test experiments on R2000 LiDAR data; includes the implementation, comparison methods, corridor/hall/office ROS 2 recordings, individual scan data, laboratory data, annotations, and figures. |
+| `sensitivity_experiment/` | Parameter-sensitivity experiments, selected annotated scans, Intel fragment-recovery candidates, and figures for the Gaussian quantile parameter, local noise-scale gain, and graph direction gate. |
+| `ablation_experiment/` | Ablation scripts and selected annotated scans for evaluating uncertainty calibration, adaptive Huber scale, and graph-based recovery. |
+| `error_calibration/` | Intel and R2000 sensor-error calibration configurations, analysis scripts, diagnostic plots, and result summaries. |
+| `parameter_list.docx` | Parameter reference document containing the default parameters used by the sensitivity-experiment implementation. |
 
-## Included resources
+### Important files
 
-| Location inside the archive | Contents |
-| --- | --- |
-| `core_method/UCG.py` | Main UCG-LineFit implementation. |
-| `core_method/feature.py`, `feature_tour_batch.py`, `feature_tour_native.py` | Required support modules for geometry, plotting, batch fitting, and optional acceleration. Keep these files beside `UCG.py`. |
-| `core_method/Algorithm_Parameters.docx` | All 148 command-line parameters and their effective defaults, presented in three-line tables. |
-| `datasets/Lab/` | Laboratory dataset and visualization, including `Lab_points.json`, `Lab_points.png`, and `single_frame.json`. |
-| `datasets/map_points.json` | Single-frame real-world point cloud with 1,166 points. |
-| `datasets/test.json` | Synthetic stress-test scene with 167 points and ground-truth annotations. |
-| `ablation/` | Three ablation scripts, a copy of `test.json`, and the latest experimental records in `latest_records/`. |
+- `Intel_data_experiment/feature.py`: UCG-LineFit implementation used for Intel-data experiments.
+- `Self_test_experiment/feature.py`: UCG-LineFit implementation used for R2000 self-test experiments.
+- `sensitivity_experiment/feature.py`: Implementation configured for the parameter-sensitivity experiments.
+- `ablation_experiment/ablation_no_uncertainty.py`: Shared ablation/evaluation entry point, including the distance-heuristic ablation.
+- `ablation_experiment/ablation_no_adaptive_huber.py`: Fixed-Huber-scale ablation.
+- `ablation_experiment/ablation_no_graph.py`: Graph-recovery ablation.
+- `error_calibration/Inter/analyze_inter.py`: Intel calibration analysis entry point.
 
-## Quick start
+The three `feature.py` files are experiment-specific implementations. Run the version from the corresponding experiment directory rather than assuming that the files are interchangeable.
 
-Python 3.10 or later is recommended. The package was checked with Python 3.12, NumPy 2.4.4, and Matplotlib 3.10.9.
+## Requirements
 
-Install the required packages:
+- Python 3.9 or later
+- NumPy
+- Matplotlib
+
+Install the basic dependencies:
 
 ```bash
 python -m pip install numpy matplotlib
 ```
 
-Run the following commands from the extracted `UCG-LineFit` folder:
+Some optional accelerated execution paths may use Numba and SciPy. They are not required for the standard NumPy implementation.
+
+## Quick start: run line extraction
+
+The experiment implementations are self-contained Python scripts. For example, to run the Intel-data implementation on a scan JSON file:
 
 ```bash
-# Single-frame real-world data
-python core_method/UCG.py --input datasets/map_points.json --output-png real_result.png --no-native-enable
-
-# Synthetic data
-python core_method/UCG.py --input datasets/test.json --output-png synthetic_result.png --no-native-enable
-
-# Laboratory data
-python core_method/UCG.py --input datasets/Lab/Lab_points.json --output-png lab_result.png --no-native-enable
-
-# All available options
-python core_method/UCG.py --help
+cd Intel_data_experiment
+python feature.py --input line_segment_mark/data/inter1.json --output-png result.png
 ```
 
-Each run saves a fitted-line visualization and a `points.png` image, and prints segment statistics, runtime, and diagnostics. Repeated runs in the same output directory overwrite `points.png`.
-
-Input JSON must contain a `points` list of objects with `x` and `y` coordinates in metres. Preserve the input point order. Use `--angle-increment` to specify the LiDAR angular increment in radians; otherwise, the CLI reads a supported metadata hint or estimates it from the points. The supplied synthetic scene includes a `0.0098` rad hint.
-
-For optional Numba acceleration, install `numba` and `scipy`, then omit `--no-native-enable`. The NumPy implementation remains available without these optional packages.
-
-## Ablation experiments
-
-Run the full method and all three ablations:
+To run the R2000 self-test implementation:
 
 ```bash
-python ablation/ablation_no_uncertainty.py --all
+cd Self_test_experiment
+python feature.py --input data/<scan_file>.json --output-png result.png
 ```
 
-The three conditions remove uncertainty calibration and sparsity compensation, replace the adaptive Huber scale with a fixed scale, and disable graph recovery together with gap bridging in other merge stages, respectively. The third condition evaluates the broader gap-recovery pipeline.
+Replace `<scan_file>.json` with an actual scan JSON filename in the selected directory. The exact available command-line options can be inspected with:
 
-Results are saved to `ablation/runs/`, including six visualizations, a JSON report, and Markdown/HTML comparison tables. Original experimental records from October 11, 2026 are preserved in `ablation/latest_records/`.
+```bash
+python feature.py --help
+```
 
-The synthetic scene was selected from 316 candidate configurations to illustrate specific mechanism differences. It is a designed stress test, not an independent unbiased benchmark. The archived records document this design and provide the support and matching statistics needed to interpret the results.
+The scripts accept point-cloud JSON input. The input data should follow the structure expected by the selected implementation; use the supplied scan JSON files as examples. Output images and diagnostic information are generated by the scripts.
+
+## Reproducing the experiments
+
+Run commands from the relevant experiment directory so that relative data paths resolve correctly.
+
+### 1. Intel-data experiments
+
+`Intel_data_experiment/` contains the Intel implementation, comparison methods (`iepf.py`, `ransac.py`, and `srg.py`), scan data, annotated line-segment data, evaluation records, and PDF figures.
+
+Use the scripts and data in this directory to reproduce or inspect the Intel-data comparisons. Check each script's help message or usage section for its supported arguments.
+
+### 2. R2000 self-test experiments
+
+`Self_test_experiment/` contains the R2000 implementation and comparison methods, as well as corridor, hall, and office recordings. ROS 2 bag recordings are provided in `.db3` format with their associated `metadata.yaml` files. Individual scan JSON files and annotated line-segment resources are also included.
+
+The `Lab/` subdirectory contains a laboratory single-frame point-cloud example.
+
+### 3. Parameter-sensitivity experiments
+
+`sensitivity_experiment/` includes selected annotated scans and the corresponding sensitivity figures:
+
+- `fig13_sensitivity_confidence.pdf`: sensitivity to the Gaussian quantile parameter.
+- `fig14_sensitivity_huber_gain.pdf`: sensitivity to the local noise-scale gain.
+- `fig15_sensitivity_graph_angle.pdf`: sensitivity to the graph direction gate.
+- `fig15_preview.pdf`: preview of the updated direction-gate experiment.
+
+The directory also contains Intel fragment-candidate scans and figures for inspecting graph-based fragment recovery.
+
+### 4. Ablation experiments
+
+The ablation scripts are located in `ablation_experiment/`. The main entry point documents the following commands:
+
+```bash
+python ablation_no_uncertainty.py --all
+python ablation_no_uncertainty.py --recorded-summary
+python ablation_no_uncertainty.py --figures
+python ablation_no_uncertainty.py --combined-figure
+```
+
+The three ablation conditions investigate:
+1. Removal of uncertainty calibration / distance-based compensation.
+2. Replacement of the adaptive Huber scale with a fixed scale.
+3. Disabling graph-based recovery.
+
+The scripts generate experiment outputs such as visualizations, reports, and comparison summaries. See the script documentation and command-line help for details about output locations and supported options.
+
+### 5. Sensor-error calibration
+
+`error_calibration/` contains calibration resources for Intel and R2000 LiDAR data, including configuration files, analysis scripts, result summaries, and diagnostic plots. The Intel analysis entry point is:
+
+```bash
+cd error_calibration/Inter
+python analyze_inter.py --help
+```
+
+Calibration recordings for the R2000 sensor are organized by distance range (`short`, `middle`, and `far`) where provided.
+
+## Data and evaluation notes
+
+- The repository includes both scan data and annotated/evaluation resources. Consult the directory-specific files to identify the data and records associated with each experiment.
+- The `selected_frames/` directories contain selected scans and associated annotations or evaluation records used by the corresponding sensitivity or ablation study.
+- The ROS 2 `.db3` files are recording data; `metadata.yaml` files provide recording metadata.
+- Sensitivity and ablation results should be interpreted in the context of their documented scan selection, parameter settings, and evaluation procedures. Selected stress-test examples are intended to expose particular algorithmic behaviors and should not automatically be treated as unbiased benchmark samples.
 
 ## Citation
 
-If you use these resources, cite the [UCG-LineFit repository](https://github.com/liuyu-up/UCG-LineFit) and record the release tag or commit hash used in your experiments. A basic repository citation is:
+If you use this code or reproduction data, please cite the associated UCG-LineFit work and this repository. For reproducibility, record the repository release tag or commit hash used in your experiments.
+
+A basic BibTeX entry for the repository is:
 
 ```bibtex
 @misc{ucg_linefit_2026,
-  title        = {{UCG-LineFit}: Line-Segment Extraction for Sparse 2D LiDAR Point Clouds},
+  title        = {{UCG-LineFit}: Robust Line-Segment Extraction for Sparse 2D LiDAR Point Clouds},
   year         = {2026},
   howpublished = {GitHub repository},
   url          = {https://github.com/liuyu-up/UCG-LineFit}
@@ -83,4 +147,4 @@ If you use these resources, cite the [UCG-LineFit repository](https://github.com
 
 ## License
 
-The source code is released under the [MIT License](./LICENSE).
+The source code is released under the [MIT License](LICENSE). Please check the license and any accompanying notices before redistributing third-party datasets, recordings, annotations, or other included materials.
