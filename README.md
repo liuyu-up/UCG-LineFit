@@ -2,133 +2,63 @@
 
 **UCG-LineFit** is a robust line-segment extraction method for sparse 2D LiDAR point clouds. The method combines sensor-uncertainty calibration, locally adaptive robust fitting, and graph-based fragment recovery to improve line extraction under measurement noise and sparse sampling.
 
-This repository provides the implementation and reproduction resources used in the associated experiments, including Intel and R2000 LiDAR data, self-test recordings, annotated scans, comparison methods, parameter-sensitivity studies, ablation experiments, and uncertainty-calibration results.
+## Download
 
-## Repository contents
+[Download Reproduction_Data.zip](https://github.com/liuyu-up/UCG-LineFit/raw/refs/heads/main/Reproduction_Data.zip)
 
-The repository is organized by experimental purpose:
+Extract the archive and open a Bash terminal in the `Reproduction_Data/` directory. The directory includes its own `README.md`.
 
-| Directory / file | Contents |
-|---|---|
-| `Intel_data_experiment/` | UCG-LineFit implementation and experiments on Intel LiDAR data; includes comparison implementations (IEPF, RANSAC, and SRG), scan data, annotated line segments, evaluation records, and figures. |
-| `Self_test_experiment/` | Self-test experiments on R2000 LiDAR data; includes the implementation, comparison methods, corridor/hall/office ROS 2 recordings, individual scan data, laboratory data, annotations, and figures. |
-| `sensitivity_experiment/` | Parameter-sensitivity experiments, selected annotated scans, Intel fragment-recovery candidates, and figures for the Gaussian quantile parameter, local noise-scale gain, and graph direction gate. |
-| `ablation_experiment/` | Ablation scripts and selected annotated scans for evaluating uncertainty calibration, adaptive Huber scale, and graph-based recovery. |
-| `error_calibration/` | Intel and R2000 sensor-error calibration configurations, analysis scripts, diagnostic plots, and result summaries. |
-| `parameter_list.docx` | Parameter reference document containing the default parameters used by the sensitivity-experiment implementation. |
+## Archive Contents
 
-### Important files
+The archive contains point clouds, manual annotations, reproduction scripts, figures, and experiment logs for the manuscript.
 
-- `Intel_data_experiment/feature.py`: UCG-LineFit implementation used for Intel-data experiments.
-- `Self_test_experiment/feature.py`: UCG-LineFit implementation used for R2000 self-test experiments.
-- `sensitivity_experiment/feature.py`: Implementation configured for the parameter-sensitivity experiments.
-- `ablation_experiment/ablation_no_uncertainty.py`: Shared ablation/evaluation entry point, including the distance-heuristic ablation.
-- `ablation_experiment/ablation_no_adaptive_huber.py`: Fixed-Huber-scale ablation.
-- `ablation_experiment/ablation_no_graph.py`: Graph-recovery ablation.
-- `error_calibration/Inter/analyze_inter.py`: Intel calibration analysis entry point.
+| Path | Contents |
+| --- | --- |
+| `Open_Dataset_Experiments/` | 40 annotated Intel scans, Figure 9 materials, and the Table 3 experiment log |
+| `Real_World_Experiments/` | R2000 recordings, 20 annotated scans, Figure 10 materials, and the Table 4 experiment log |
+| `Runtime_Analysis/` | Figure 11 and its stage-by-stage timing log |
+| `Ablation_Study/` | Ablation methods, 30 annotated scans, and materials for Figure 12 and Table 5 |
+| `Sensitivity_Analysis/` | Two sets of 30 scans and materials for Figures 13–15 |
+| `error_calibration/` and `parameter_list.docx` | Sensor calibration reports and parameter settings |
 
-The three `feature.py` files are experiment-specific implementations. Run the version from the corresponding experiment directory rather than assuming that the files are interchangeable.
+## Linux Setup
 
-## Requirements
-
-- Python 3.9 or later
-- NumPy
-- Matplotlib
-
-Install the basic dependencies:
+Use Ubuntu 22.04.3 LTS and Python 3.10.12. The scripts read exported JSON point clouds directly. Numba is optional and accelerates UCG-LineFit. Replace the path below with the extracted directory.
 
 ```bash
-python -m pip install numpy matplotlib
+cd '/path/to/Reproduction_Data'
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install numpy==1.24.4 matplotlib==3.7.5 scipy==1.10.1
+
+export MPLBACKEND=Agg
+OUT="$PWD/reproduced"
+mkdir -p "$OUT"
 ```
 
-Some optional accelerated execution paths may use Numba and SciPy. They are not required for the standard NumPy implementation.
-
-## Quick start: run line extraction
-
-The experiment implementations are self-contained Python scripts. For example, to run the Intel-data implementation on a scan JSON file:
+## Reproduction Commands
 
 ```bash
-cd Intel_data_experiment
-python feature.py --input line_segment_mark/data/inter1.json --output-png result.png
+# Figures 9 and 10
+python3 -B Open_Dataset_Experiments/Figure_9/reproduce_fig9.py \
+  --methods UCG-LineFit RANSAC IEPF SRG --output-dir "$OUT/fig9"
+python3 -B Real_World_Experiments/Figure_10/reproduce_fig10.py \
+  --methods UCG-LineFit RANSAC IEPF SRG --output-dir "$OUT/fig10"
+
+# Figure 12 and Table 5
+python3 -B Ablation_Study/Figure_12_Local_Point_Clouds/reproduce_fig12.py --output "$OUT/fig12.pdf"
+python3 -B Ablation_Study/reproduce_table5.py --output-dir "$OUT/table5"
+
+# Figures 13–15
+python3 -B Sensitivity_Analysis/reproduce_fig13_15.py --output-dir "$OUT/sensitivity"
 ```
 
-To run the R2000 self-test implementation:
+Figures 9 and 10 produce a PDF per method and save the extracted segments as JSON. Table 5 writes CSV and JSON results. To continue an interrupted sweep for Figures 13–15, rerun the command with `--resume` and the same output directory.
 
-```bash
-cd Self_test_experiment
-python feature.py --input data/<scan_file>.json --output-png result.png
-```
+## Recorded Results
 
-Replace `<scan_file>.json` with an actual scan JSON filename in the selected directory. The exact available command-line options can be inspected with:
-
-```bash
-python feature.py --help
-```
-
-The scripts accept point-cloud JSON input. The input data should follow the structure expected by the selected implementation; use the supplied scan JSON files as examples. Output images and diagnostic information are generated by the scripts.
-
-## Reproducing the experiments
-
-Run commands from the relevant experiment directory so that relative data paths resolve correctly.
-
-### 1. Intel-data experiments
-
-`Intel_data_experiment/` contains the Intel implementation, comparison methods (`iepf.py`, `ransac.py`, and `srg.py`), scan data, annotated line-segment data, evaluation records, and PDF figures.
-
-Use the scripts and data in this directory to reproduce or inspect the Intel-data comparisons. Check each script's help message or usage section for its supported arguments.
-
-### 2. R2000 self-test experiments
-
-`Self_test_experiment/` contains the R2000 implementation and comparison methods, as well as corridor, hall, and office recordings. ROS 2 bag recordings are provided in `.db3` format with their associated `metadata.yaml` files. Individual scan JSON files and annotated line-segment resources are also included.
-
-The `Lab/` subdirectory contains a laboratory single-frame point-cloud example.
-
-### 3. Parameter-sensitivity experiments
-
-`sensitivity_experiment/` includes selected annotated scans and the corresponding sensitivity figures:
-
-- `fig13_sensitivity_confidence.pdf`: sensitivity to the Gaussian quantile parameter.
-- `fig14_sensitivity_huber_gain.pdf`: sensitivity to the local noise-scale gain.
-- `fig15_sensitivity_graph_angle.pdf`: sensitivity to the graph direction gate.
-- `fig15_preview.pdf`: preview of the updated direction-gate experiment.
-
-The directory also contains Intel fragment-candidate scans and figures for inspecting graph-based fragment recovery.
-
-### 4. Ablation experiments
-
-The ablation scripts are located in `ablation_experiment/`. The main entry point documents the following commands:
-
-```bash
-python ablation_no_uncertainty.py --all
-python ablation_no_uncertainty.py --recorded-summary
-python ablation_no_uncertainty.py --figures
-python ablation_no_uncertainty.py --combined-figure
-```
-
-The three ablation conditions investigate:
-1. Removal of uncertainty calibration / distance-based compensation.
-2. Replacement of the adaptive Huber scale with a fixed scale.
-3. Disabling graph-based recovery.
-
-The scripts generate experiment outputs such as visualizations, reports, and comparison summaries. See the script documentation and command-line help for details about output locations and supported options.
-
-### 5. Sensor-error calibration
-
-`error_calibration/` contains calibration resources for Intel and R2000 LiDAR data, including configuration files, analysis scripts, result summaries, and diagnostic plots. The Intel analysis entry point is:
-
-```bash
-cd error_calibration/Inter
-python analyze_inter.py --help
-```
-
-Calibration recordings for the R2000 sensor are organized by distance range (`short`, `middle`, and `far`) where provided.
-
-## Data and evaluation notes
-
-- The repository includes both scan data and annotated/evaluation resources. Consult the directory-specific files to identify the data and records associated with each experiment.
-- The `selected_frames/` directories contain selected scans and associated annotations or evaluation records used by the corresponding sensitivity or ablation study.
-- The ROS 2 `.db3` files are recording data; `metadata.yaml` files provide recording metadata.
-- Sensitivity and ablation results should be interpreted in the context of their documented scan selection, parameter settings, and evaluation procedures. Selected stress-test examples are intended to expose particular algorithmic behaviors and should not automatically be treated as unbiased benchmark samples.
+- Figure 11. PDF at `Runtime_Analysis/fig11.pdf` and stage timing log at `Runtime_Analysis/experiment_log.txt`.
+- Tables 3 and 4. Intel experiment log at `Open_Dataset_Experiments/experiment_log.txt` and R2000 experiment log at `Real_World_Experiments/experiment_log.txt`.
 
 ## Citation
 
