@@ -14,7 +14,7 @@ Download the `Reproduction_Data.zip` release asset for the complete reproduction
 
 Version 1.1.1 contains 441 files in a 112,879,514-byte ZIP archive. SHA-256: `461b337253a65973bbfba09c30a46654ea4e4ee42a065c715ba6bf85321b4f41`.
 
-[Zenodo archive (all versions)](https://doi.org/10.5281/zenodo.24341194).
+[Zenodo archive v1.1.1](https://doi.org/10.5281/zenodo.24535294) | [Zenodo archive (all versions)](https://doi.org/10.5281/zenodo.24341194).
 
 ## Start here: reproduce all tables and figures
 
