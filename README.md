@@ -6,11 +6,15 @@ This package contains the source materials and reproduction workflow for Tables 
 
 ## Download
 
-[Download Reproduction_Data.zip (v1.1.0)](https://github.com/liuyu-up/UCG-LineFit/releases/download/v1.1.0/Reproduction_Data.zip)
+[Download Reproduction_Data.zip (v1.1.1)](https://github.com/liuyu-up/UCG-LineFit/releases/download/v1.1.1/Reproduction_Data.zip)
 
-[Release v1.1.0](https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.1.0) | [Previous release v1.0.0](https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.0.0)
+[Release v1.1.1](https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.1.1) | [Previous release v1.1.0](https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.1.0) | [Previous release v1.0.0](https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.0.0)
 
-Download the `Reproduction_Data.zip` release asset for the complete reproduction package. Extract it and open a terminal in the extracted `Reproduction_Data/` directory. All file paths and execution commands below refer to that directory. The original `v1.0.0` release remains available unchanged.
+Download the `Reproduction_Data.zip` release asset for the complete reproduction package. Extract it and open a terminal in the extracted `Reproduction_Data/` directory. All file paths and execution commands below refer to that directory. The `v1.0.0` and `v1.1.0` releases remain available unchanged.
+
+Version 1.1.1 contains 441 files in a 112,879,514-byte ZIP archive. SHA-256: `461b337253a65973bbfba09c30a46654ea4e4ee42a065c715ba6bf85321b4f41`.
+
+[Zenodo archive (all versions)](https://doi.org/10.5281/zenodo.24341194).
 
 ## Start here: reproduce all tables and figures
 
@@ -66,7 +70,7 @@ The complete package can be moved without editing any paths. The script resolves
 
 ## Archive contents
 
-This archive includes the input scans, annotations, method implementations, reproduction scripts, instruction files, original experiment records, original reference figures, and manuscript assets. Generated experiment logs, figures, segment exports, sensitivity result files, checkpoints, and caches are excluded. The reproduction commands create these outputs after dependency installation.
+This archive includes the input scans, annotations, method implementations, reproduction scripts, instruction files, original experiment records, original reference figures, and manuscript assets. Generated experiment logs, figures, segment exports, sensitivity result files and checkpoints are excluded. The reproduction commands create these outputs after dependency installation.
 
 The original `experiment_log.txt` and `experiment_log_wctls.txt` files, reference and annotation PDFs, `figure_reference.json`, the three original sensitivity PDF templates, and `manuscript_assets/tables1_2.txt` are retained. These files provide the recorded references or inputs required for reproduction.
 
@@ -83,6 +87,7 @@ The original `experiment_log.txt` and `experiment_log_wctls.txt` files, referenc
 | `Ablation_Study/Figure_12_Local_Point_Clouds/` | Three local-view manifests and the complete Figure 12 reproduction script |
 | `Sensitivity_Analysis/` | Two groups of thirty annotated scans, the shared method, original PDF style templates, and the reproduction script for Figures 13-15 |
 | `error_calibration/Inter/` and `error_calibration/R2000/` | Sensor calibration reports |
+| `Parameter_Tuning_Records/` | Two TXT tuning-result tables, supplementary parameter-selection tables in DOCX, and ten paired JSON/PDF scan annotations for each of Intel and R2000; five methods with sixty candidate configurations per method and dataset and their selected configurations |
 | `parameter_list.docx` | Sensor and algorithm parameter reference |
 | `requirements.txt` | Central dependency installation requirements |
 | `manuscript_assets/` | Original figure artwork and `tables1_2.txt`; the complete reproduction script imports Figures 1-8 and Tables 1-2 from this directory |
@@ -174,9 +179,9 @@ If you use this reproduction package, cite the associated UCG-LineFit work and i
 @misc{ucg_linefit_reproduction_2026,
   title        = {{UCG-LineFit} Reproduction Package},
   year         = {2026},
-  version      = {1.1.0},
+  version      = {1.1.1},
   howpublished = {GitHub release},
-  url          = {https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.1.0}
+  url          = {https://github.com/liuyu-up/UCG-LineFit/releases/tag/v1.1.1}
 }
 ```
 
